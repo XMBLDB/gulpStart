@@ -1,0 +1,7 @@
+{
+  "name": "appix3-0",
+  "private": true,
+  "dependencies": {
+    "jquery": "~2.1.1"
+  }
+}
