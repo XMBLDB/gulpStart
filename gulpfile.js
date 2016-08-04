@@ -7,42 +7,69 @@ var less=require('gulp-less');
 var minifycss=require('gulp-minify-css');
 var browserSync=require('browser-sync').create();
 
+
+var url='userCollect';
+var urlHtml='./source/'+url+'/'+url+'.html';
+
 //自动刷新浏览器
 gulp.task('refresh',function(){
 	browserSync.init({
 		 server: {
-            baseDir: "./appix3.0/"
+            baseDir: "./target/"
         }
 	});
-	gulp.watch('./appix3.0/**').on('change',browserSync.reload);
+	gulp.watch('./target/**').on('change',browserSync.reload);
 })
 
 //合并html代码块
 gulp.task('concat',function() {
-    gulp.src("./app/userCenter/userCenter.html")
+    gulp.src(urlHtml)
         .pipe(contentIncluder({
             includerReg:/<!\-\-include\s+"([^"]+)"\-\->/g
         }))
-        .pipe(gulp.dest('./appix3.0'));
+        .pipe(gulp.dest('./sourceix3.0'));
 });
-gulp.watch(['./app/common/**/*.html','./app/userCenter/**/*.html','./app/userCenter/*.html'],['concat']);
+gulp.watch(['./source/common/**/*.html','./source/'+url+'/**/*.html','./source/'+url+'/*.html'],['concat']);
 
 //合并css
 gulp.task('concatCss',function(){
-	gulp.src(['./app/common/**/*.less','./app/userCenter/**/*.less'])
+	gulp.src(['./source/common/*.less','./source/common/**/*.less','./source/'+url+'/**/*.less'])
+			.pipe(concat(url+'.less'))
 			.pipe(less())
-			.pipe(concat('userCenter.css'))
 			.pipe(minifycss())
-			.pipe(gulp.dest('./appix3.0/css'))
+			.pipe(gulp.dest('./target/css'))
 })
-gulp.watch(['./app/common/**/*.less','./app/userCenter/**/*.less'],['concatCss'])
+gulp.watch(['./source/common/*.less','./source/common/**/*.less','./source/'+url+'/*.less','./source/'+url+'/**/*.less'],['concatCss'])
 
 //合并js
 gulp.task('concatJs',function(){
-	gulp.src(['./app/common/**/*.js','./app/userCenter/**/*.js'])
-			.pipe(concat('userCenter.js'))
-			.pipe(gulp.dest('./appix3.0/js'))
+	gulp.src(['./source/common/*.js','./source/common/**/*.js','./source/'+url+'/*.js','./source/'+url+'/**/*.js'])
+			.pipe(concat(url+'.js'))
+//			.pipe(uglify())
+			.pipe(gulp.dest('./target/js'))
 })
-gulp.watch(['./app/common/**/*.js','./app/userCenter/**/*.js'],['concatJs'])
+gulp.watch(['./source/common/*.js','./source/common/**/*.js','./source/'+url+'/**/*.js'],['concatJs'])
 
-gulp.task('default',['refresh','concat','concatCss','concatJs'])
+var jsUrl='./source/uploadFile/problem/problem.js';
+
+//检查js
+//gulp.task('js',function(){
+//	gulp.src(jsUrl)
+//		.pipe(jshint())
+//		.pipe(jshint.reporter('default'))
+//});
+//gulp.watch(jsUrl,['js']);
+
+//gulp.task('default',['concat','concatCss','concatJs','js']);
+
+
+gulp.task('images', function () {
+    gulp.src('./target/img_1/*.*')
+        .pipe(imagemin({
+            progressive: true,
+            use: [pngquant({quality: '65-80'})]
+        }))
+        .pipe(gulp.dest('./target/img'));
+});
+
+gulp.task('default',['refresh','concat','concatCss','concatJs']);
