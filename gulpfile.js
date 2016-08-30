@@ -6,9 +6,10 @@ var contentIncluder=require('gulp-content-includer');
 var less=require('gulp-less');
 var minifycss=require('gulp-minify-css');
 var browserSync=require('browser-sync').create();
+var htmlmin=require('gulp-htmlmin');
 
 
-var url='userCollect';
+var url='index';
 var urlHtml='./source/'+url+'/'+url+'.html';
 
 //自动刷新浏览器
@@ -21,13 +22,26 @@ gulp.task('refresh',function(){
 	gulp.watch('./target/**').on('change',browserSync.reload);
 })
 
-//合并html代码块
+
+//合并压缩html代码块
+
+var options = {
+	collapseWhitespace:true,
+	collapseBooleanAttributes:true,
+	removeComments:true,
+	removeEmptyAttributes:true,
+	removeScriptTypeAttributes:true,
+	removeStyleLinkTypeAttributes:true,
+	minifyJS:true,
+	minifyCSS:true 
+};
 gulp.task('concat',function() {
     gulp.src(urlHtml)
         .pipe(contentIncluder({
             includerReg:/<!\-\-include\s+"([^"]+)"\-\->/g
         }))
-        .pipe(gulp.dest('./sourceix3.0'));
+        .pipe(htmlmin(options))
+        .pipe(gulp.dest('./target'));
 });
 gulp.watch(['./source/common/**/*.html','./source/'+url+'/**/*.html','./source/'+url+'/*.html'],['concat']);
 
@@ -45,7 +59,7 @@ gulp.watch(['./source/common/*.less','./source/common/**/*.less','./source/'+url
 gulp.task('concatJs',function(){
 	gulp.src(['./source/common/*.js','./source/common/**/*.js','./source/'+url+'/*.js','./source/'+url+'/**/*.js'])
 			.pipe(concat(url+'.js'))
-//			.pipe(uglify())
+			.pipe(uglify())
 			.pipe(gulp.dest('./target/js'))
 })
 gulp.watch(['./source/common/*.js','./source/common/**/*.js','./source/'+url+'/**/*.js'],['concatJs'])
